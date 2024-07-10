@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journalist Search</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .search-container {
+            margin: 20px;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .result-item {
+            padding: 10px;
+            border: 2px solid #ccc;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <input type="text" id="search-bar" placeholder="Search for journalists or posts..." onkeyup="search()">
+    </div>
+    <div class="results" id="results"></div>
+
+    <script>
+        function search() {
+            const query = $('#search-bar').val();
+            if (query.length > 0) {
+                $.ajax({
+                    url: 'http://127.0.0.1:5000/search',        /*we need to update this to the correct API address */
+                    method: 'GET',
+                    data: { q: query },
+                    success: function (response) {
+                        $('#results').empty();
+                        if (response.journalists.length > 0) {
+                            $('#results').append('<h3>Journalists</h3>');
+                            response.journalists.forEach(journalist => {
+                                $('#results').append(`
+                                    <div class="result-item">
+                                        <h4>${journalist.name}</h4>
+                                        <p>${journalist.profile}</p>
+                                    </div>
+                                `);
+                            });
+                        }
+                        if (response.posts.length > 0) {
+                            $('#results').append('<h3>Posts</h3>');
+                            response.posts.forEach(post => {
+                                $('#results').append(`
+                                    <div class="result-item">
+                                        <h4>${post.title}</h4>
+                                        <p>${post.content}</p>
+                                    </div>
+                                `);
+                            });
+                        }
+                    }
+                });
+            } else {
+                $('#results').empty();
+            }
+        }
+    </script>
+</body>
+</html>

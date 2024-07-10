@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Subscriptions</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Add your CSS styles here */
+    </style>
+</head>
+<body>
+    <div>
+        <h2>Login</h2>
+        <form id="login-form">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <div>
+        <h2>User Profile</h2>
+        <div id="profile"></div>
+    </div>
+    <div>
+        <h2>Subscriptions</h2>
+        <ul id="subscriptions"></ul>
+    </div>
+
+    <script>
+        let token = '';
+
+        $('#login-form').submit(function (e) {
+            e.preventDefault();
+            const username = $('#username').val();
+            const password = $('#password').val();
+
+            $.ajax({
+                url: 'http://127.0.0.1:5000/login',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ username, password }),
+                success: function (response) {
+                    token = response.access_token;
+                    getProfile();
+                    getSubscriptions();
+                },
+                error: function () {
+                    alert('Login failed');
+                }
+            });
+        });
+
+        function getProfile() {
+            $.ajax({
+                url: 'http://127.0.0.1:5000/profile',
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                success: function (response) {
+                    $('#profile').html(`<p>Username: ${response.username}</p><p>Profile: ${response.profile}</p>`);
+                }
+            });
+        }
+
+        function getSubscriptions() {
+            $.ajax({
+                url: 'http://127.0.0.1:5000/subscriptions',
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                success: function (response) {
+                    $('#subscriptions').empty();
+                    response.subscribed_to.forEach(sub => {
+                        $('#subscriptions').append(`<li>${sub}</li>`);
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
